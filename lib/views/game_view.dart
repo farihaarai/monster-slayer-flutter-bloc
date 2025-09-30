@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:monster_combat/bloc/game_bloc.dart';
+import 'package:monster_combat/bloc/game_event.dart';
 import 'package:monster_combat/bloc/game_state.dart';
 
 class GameView extends StatelessWidget {
@@ -20,7 +21,7 @@ class GameView extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: BlocBuilder<GameBloc, GameState>(
           builder: (context, state) {
-            var bloc = BlocProvider.of<GameBloc>(context);
+            GameBloc bloc = BlocProvider.of<GameBloc>(context);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -45,7 +46,7 @@ class GameView extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         LinearProgressIndicator(
-                          value: 100,
+                          value: state.monsterHealth / 100,
                           backgroundColor: Colors.grey[300],
                           color: Colors.red,
                           minHeight: 20,
@@ -95,7 +96,7 @@ class GameView extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         LinearProgressIndicator(
-                          value: 100,
+                          value: state.playerHealth / 100,
                           backgroundColor: Colors.grey[300],
                           color: Colors.blue,
                           minHeight: 20,
@@ -118,7 +119,9 @@ class GameView extends StatelessWidget {
                   alignment: WrapAlignment.center,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        bloc.add(AttackMonster());
+                      },
                       label: const Text("Attack"),
                       icon: const Icon(Icons.sports_martial_arts),
                       style: ElevatedButton.styleFrom(
@@ -131,11 +134,18 @@ class GameView extends StatelessWidget {
                     ),
 
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        (state.attackCount >= 2 && !state.disabledButtons)
+                            ? bloc.add(SpecialAttack())
+                            : null;
+                      },
                       label: const Text("Special Attack"),
                       icon: const Icon(Icons.flash_on),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
+                        backgroundColor:
+                            (state.attackCount >= 2 && !state.disabledButtons)
+                            ? Colors.purple
+                            : Colors.grey,
                         padding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
@@ -144,7 +154,9 @@ class GameView extends StatelessWidget {
                     ),
 
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        bloc.add(Heal());
+                      },
                       label: const Text("Heal"),
                       icon: const Icon(Icons.healing),
                       style: ElevatedButton.styleFrom(
@@ -157,7 +169,9 @@ class GameView extends StatelessWidget {
                     ),
 
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        bloc.add(Reset());
+                      },
                       label: Text(
                         state.disabledButtons ? "Reset" : "Surrender",
                       ),
